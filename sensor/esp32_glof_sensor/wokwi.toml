@@ -1,0 +1,9 @@
+[wokwi]
+version = 1
+firmware = "esp32_glof_sensor.ino"
+elf = "build/esp32_glof_sensor.elf"
+
+# Enable WiFi gateway mode
+# This allows the simulation to connect to your local network
+[wokwi.gateway]
+enabled = true

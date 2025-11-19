@@ -1,0 +1,21 @@
+# Railway Configuration for Barfani Monorepo
+# This file defines two services: backend and frontend
+
+[build]
+builder = "nixpacks"
+
+# Backend Service Configuration
+[deploy.backend]
+startCommand = "npm start"
+healthcheckPath = "/api/health"
+healthcheckTimeout = 100
+restartPolicyType = "on-failure"
+restartPolicyMaxRetries = 10
+
+# Frontend Service Configuration
+[deploy.frontend]
+startCommand = "npm start"
+healthcheckPath = "/"
+healthcheckTimeout = 100
+restartPolicyType = "on-failure"
+restartPolicyMaxRetries = 10

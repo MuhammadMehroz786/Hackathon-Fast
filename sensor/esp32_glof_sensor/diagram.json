@@ -1,0 +1,220 @@
+{
+  "version": 1,
+  "author": "Project Barfani Team",
+  "editor": "wokwi",
+  "parts": [
+    {
+      "type": "wokwi-esp32-devkit-v1",
+      "id": "esp32",
+      "top": 0,
+      "left": 0,
+      "attrs": {}
+    },
+    {
+      "type": "wokwi-dht22",
+      "id": "dht1",
+      "top": -100,
+      "left": 150,
+      "attrs": {
+        "temperature": "-5",
+        "humidity": "60"
+      }
+    },
+    {
+      "type": "wokwi-hc-sr04",
+      "id": "ultrasonic1",
+      "top": 100,
+      "left": 150,
+      "attrs": {
+        "distance": "200"
+      }
+    },
+    {
+      "type": "wokwi-slide-potentiometer",
+      "id": "pot1",
+      "top": 300,
+      "left": 150,
+      "attrs": {
+        "value": "512"
+      }
+    },
+    {
+      "type": "wokwi-led",
+      "id": "led1",
+      "top": -50,
+      "left": -150,
+      "attrs": {
+        "color": "green"
+      }
+    },
+    {
+      "type": "wokwi-resistor",
+      "id": "r1",
+      "top": -20,
+      "left": -180,
+      "attrs": {
+        "value": "220"
+      }
+    },
+    {
+      "type": "wokwi-text",
+      "id": "text1",
+      "top": -200,
+      "left": 0,
+      "attrs": {
+        "text": "Project Barfani - GLOF Sensor Node",
+        "font-size": "20",
+        "color": "#0066cc"
+      }
+    },
+    {
+      "type": "wokwi-text",
+      "id": "text2",
+      "top": -170,
+      "left": 150,
+      "attrs": {
+        "text": "DHT22: Temperature & Humidity",
+        "font-size": "12"
+      }
+    },
+    {
+      "type": "wokwi-text",
+      "id": "text3",
+      "top": 70,
+      "left": 150,
+      "attrs": {
+        "text": "HC-SR04: Water Level (Ultrasonic)",
+        "font-size": "12"
+      }
+    },
+    {
+      "type": "wokwi-text",
+      "id": "text4",
+      "top": 270,
+      "left": 150,
+      "attrs": {
+        "text": "Seismic Activity (Potentiometer simulates vibration)",
+        "font-size": "12"
+      }
+    }
+  ],
+  "connections": [
+    [
+      "esp32:TX0",
+      "$serialMonitor:RX",
+      "",
+      []
+    ],
+    [
+      "esp32:RX0",
+      "$serialMonitor:TX",
+      "",
+      []
+    ],
+    [
+      "dht1:VCC",
+      "esp32:3V3",
+      "red",
+      [
+        "v0"
+      ]
+    ],
+    [
+      "dht1:GND",
+      "esp32:GND.1",
+      "black",
+      [
+        "v0"
+      ]
+    ],
+    [
+      "dht1:SDA",
+      "esp32:D4",
+      "green",
+      [
+        "v0"
+      ]
+    ],
+    [
+      "ultrasonic1:VCC",
+      "esp32:VIN",
+      "red",
+      [
+        "v0"
+      ]
+    ],
+    [
+      "ultrasonic1:GND",
+      "esp32:GND.2",
+      "black",
+      [
+        "v0"
+      ]
+    ],
+    [
+      "ultrasonic1:TRIG",
+      "esp32:D5",
+      "blue",
+      [
+        "v0"
+      ]
+    ],
+    [
+      "ultrasonic1:ECHO",
+      "esp32:D18",
+      "yellow",
+      [
+        "v0"
+      ]
+    ],
+    [
+      "pot1:VCC",
+      "esp32:3V3",
+      "red",
+      [
+        "v0"
+      ]
+    ],
+    [
+      "pot1:GND",
+      "esp32:GND.3",
+      "black",
+      [
+        "v0"
+      ]
+    ],
+    [
+      "pot1:SIG",
+      "esp32:D34",
+      "orange",
+      [
+        "v0"
+      ]
+    ],
+    [
+      "led1:A",
+      "r1:2",
+      "green",
+      [
+        "v0"
+      ]
+    ],
+    [
+      "r1:1",
+      "esp32:D2",
+      "green",
+      [
+        "v0"
+      ]
+    ],
+    [
+      "led1:C",
+      "esp32:GND.1",
+      "black",
+      [
+        "v0"
+      ]
+    ]
+  ],
+  "dependencies": {}
+}
