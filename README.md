@@ -4,6 +4,10 @@
 
 A comprehensive IoT-based glacier monitoring system designed to detect and provide early warnings for Glacial Lake Outburst Floods (GLOFs) in Northern Pakistan.
 
+## 📊 Presentation
+
+**View our pitch deck:** [Project Barfani Presentation](https://gamma.app/docs/Project-Barfani--mn700fciagf8buo)
+
 ## 🎯 Problem Statement
 
 Northern Pakistan's glaciers are melting at an alarming rate, creating unstable glacial lakes that can cause catastrophic floods (GLOFs). This system provides real-time monitoring and early warning capabilities to save lives and infrastructure.
@@ -374,6 +378,12 @@ For questions during the hackathon:
 - Check `docs/` folder for additional documentation
 - Review API endpoints in Postman/Insomnia
 - Test with `testData.js` for quick validation
+
+## 🔗 Links
+
+- **Presentation:** [View Pitch Deck](https://gamma.app/docs/Project-Barfani--mn700fciagf8buo)
+- **GitHub Repository:** [MuhammadMehroz786/Hackathon-Fast](https://github.com/MuhammadMehroz786/Hackathon-Fast)
+- **Live Demo:** (Add your deployed URL here)
 
 ---
 
