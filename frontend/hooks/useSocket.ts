@@ -38,6 +38,13 @@ export function useSocket() {
       setLastUpdateTime(new Date())
     })
 
+    socketInstance.on('system_reset', (data: any) => {
+      console.log('🔄 System reset received - clearing all data')
+      setAlerts([])
+      setSensorUpdates([])
+      setLastUpdateTime(null)
+    })
+
     socketInstance.on('disconnect', () => {
       console.log('❌ Disconnected from backend')
       setIsConnected(false)

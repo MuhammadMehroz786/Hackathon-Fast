@@ -138,6 +138,16 @@ class AlertEngine {
 
     return urduMessages[riskLevel] || urduMessages.LOW;
   }
+
+  /**
+   * Reset alert engine - clear all sensor history
+   * Used when switching from test mode to real-time mode
+   */
+  reset() {
+    console.log('🔄 Resetting Alert Engine sensor history...');
+    this.sensorHistory = {};
+    console.log('✅ Alert Engine reset complete');
+  }
 }
 
 module.exports = new AlertEngine();

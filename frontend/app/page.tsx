@@ -11,6 +11,9 @@ import MLInsights from '@/components/MLInsights'
 import ManualControl from '@/components/ManualControl'
 import { useSocket } from '@/hooks/useSocket'
 import { useSensorData } from '@/hooks/useSensorData'
+import axios from 'axios'
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001'
 
 export default function Home() {
   const [language, setLanguage] = useState<'en' | 'ur' | 'bs'>('en')
@@ -21,6 +24,30 @@ export default function Home() {
 
   const triggerMLRefresh = () => {
     setMlRefreshTrigger(prev => prev + 1)
+  }
+
+  // Handle test mode toggle - reset system when disabling test mode
+  const handleTestModeToggle = async () => {
+    const newMode = !testModeEnabled
+
+    // If turning OFF test mode (going to real-time mode), reset everything
+    if (!newMode && testModeEnabled) {
+      try {
+        console.log('🔄 Switching to Real-Time Mode - Resetting system...')
+        const response = await axios.post(`${API_URL}/api/sensor/reset`)
+        console.log('✅ System reset:', response.data.message)
+
+        // Clear local alerts as well
+        clearAlerts()
+
+        // Trigger ML refresh after reset
+        triggerMLRefresh()
+      } catch (error) {
+        console.error('❌ Failed to reset system:', error)
+      }
+    }
+
+    setTestModeEnabled(newMode)
   }
 
   return (
@@ -65,7 +92,7 @@ export default function Home() {
               </div>
 
               <button
-                onClick={() => setTestModeEnabled(!testModeEnabled)}
+                onClick={handleTestModeToggle}
                 className={`relative inline-flex h-12 w-24 items-center rounded-full transition-colors duration-300 focus:outline-none ${
                   testModeEnabled ? 'bg-gradient-to-r from-purple-500 to-pink-600' : 'bg-gray-300'
                 }`}

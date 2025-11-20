@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Project Barfani - IoT Hardware Dashboard</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      color: #e2e8f0;
+      padding: 20px;
+    }
+
+    .header {
+      text-align: center;
+      padding: 30px;
+      background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+      border-radius: 15px;
+      margin-bottom: 30px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+
+    .header h1 {
+      font-size: 2.5rem;
+      margin-bottom: 10px;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .header p {
+      font-size: 1.1rem;
+      opacity: 0.9;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      border-bottom: 2px solid #334155;
+      padding-bottom: 10px;
+    }
+
+    .tab {
+      padding: 12px 24px;
+      background: #1e293b;
+      border: none;
+      color: #94a3b8;
+      cursor: pointer;
+      border-radius: 8px 8px 0 0;
+      font-size: 1rem;
+      transition: all 0.3s;
+    }
+
+    .tab:hover {
+      background: #334155;
+      color: #e2e8f0;
+    }
+
+    .tab.active {
+      background: #3b82f6;
+      color: white;
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+
+    .card {
+      background: #1e293b;
+      border-radius: 12px;
+      padding: 25px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+      border: 1px solid #334155;
+    }
+
+    .card h2 {
+      font-size: 1.5rem;
+      margin-bottom: 20px;
+      color: #60a5fa;
+      border-bottom: 2px solid #334155;
+      padding-bottom: 10px;
+    }
+
+    .circuit-diagram {
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+      margin: 20px 0;
+    }
+
+    .component {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px;
+      margin: 8px 0;
+      background: #0f172a;
+      border-radius: 8px;
+      border-left: 4px solid #3b82f6;
+    }
+
+    .component-name {
+      font-weight: bold;
+      color: #60a5fa;
+    }
+
+    .component-value {
+      color: #94a3b8;
+      font-family: 'Courier New', monospace;
+    }
+
+    .sensor-reading {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px;
+      margin: 10px 0;
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      border-radius: 8px;
+      border: 1px solid #334155;
+    }
+
+    .reading-label {
+      font-size: 0.9rem;
+      color: #94a3b8;
+    }
+
+    .reading-value {
+      font-size: 1.3rem;
+      font-weight: bold;
+      color: #60a5fa;
+    }
+
+    .battery-indicator {
+      width: 100%;
+      height: 30px;
+      background: #0f172a;
+      border-radius: 6px;
+      overflow: hidden;
+      position: relative;
+      border: 2px solid #334155;
+    }
+
+    .battery-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #10b981 0%, #34d399 100%);
+      transition: width 0.5s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+      font-size: 0.85rem;
+    }
+
+    .battery-fill.low {
+      background: linear-gradient(90deg, #ef4444 0%, #f87171 100%);
+    }
+
+    .battery-fill.medium {
+      background: linear-gradient(90deg, #f59e0b 0%, #fbbf24 100%);
+    }
+
+    .status-indicator {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      margin-right: 8px;
+    }
+
+    .status-indicator.online {
+      background: #10b981;
+      box-shadow: 0 0 10px #10b981;
+    }
+
+    .status-indicator.charging {
+      background: #fbbf24;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .pin-diagram {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin: 15px 0;
+    }
+
+    .pin {
+      padding: 10px;
+      background: #0f172a;
+      border-radius: 6px;
+      border-left: 3px solid #3b82f6;
+      font-family: 'Courier New', monospace;
+      font-size: 0.9rem;
+    }
+
+    .spec-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 15px 0;
+    }
+
+    .spec-table th,
+    .spec-table td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #334155;
+    }
+
+    .spec-table th {
+      background: #0f172a;
+      color: #60a5fa;
+      font-weight: bold;
+    }
+
+    .spec-table td:first-child {
+      color: #94a3b8;
+      font-weight: 500;
+    }
+
+    .alert {
+      padding: 15px;
+      border-radius: 8px;
+      margin: 15px 0;
+      border-left: 4px solid;
+    }
+
+    .alert.info {
+      background: #1e3a8a;
+      border-color: #3b82f6;
+    }
+
+    .alert.warning {
+      background: #78350f;
+      border-color: #f59e0b;
+    }
+
+    svg {
+      width: 100%;
+      height: auto;
+    }
+
+    .node-selector {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .node-btn {
+      flex: 1;
+      padding: 15px;
+      background: #1e293b;
+      border: 2px solid #334155;
+      color: #e2e8f0;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .node-btn:hover {
+      border-color: #3b82f6;
+      background: #334155;
+    }
+
+    .node-btn.active {
+      border-color: #3b82f6;
+      background: #1e40af;
+    }
+
+    .live-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      background: #10b981;
+      color: white;
+      border-radius: 12px;
+      font-size: 0.85rem;
+      font-weight: bold;
+      animation: pulse 2s infinite;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🔌 Project Barfani - IoT Hardware Dashboard</h1>
+      <p>Virtual ESP32 Sensor Nodes | Circuit Diagrams | Real-time Monitoring</p>
+      <span class="live-badge">LIVE</span>
+    </div>
+
+    <div class="tabs">
+      <button class="tab active" onclick="showTab('overview')">📊 Overview</button>
+      <button class="tab" onclick="showTab('circuits')">🔌 Circuit Diagrams</button>
+      <button class="tab" onclick="showTab('sensors')">📡 Live Sensors</button>
+      <button class="tab" onclick="showTab('power')">🔋 Power System</button>
+      <button class="tab" onclick="showTab('specs')">📝 Specifications</button>
+    </div>
+
+    <!-- Overview Tab -->
+    <div id="overview" class="tab-content active">
+      <div class="grid">
+        <div class="card">
+          <h2>System Architecture</h2>
+          <div class="alert info">
+            <strong>🏔️ Glacier Monitoring Network</strong><br>
+            3 autonomous sensor nodes deployed at glacier lakes in Northern Pakistan
+          </div>
+          <table class="spec-table">
+            <tr>
+              <th>Component</th>
+              <th>Details</th>
+            </tr>
+            <tr>
+              <td>Microcontroller</td>
+              <td>ESP32-WROOM-32</td>
+            </tr>
+            <tr>
+              <td>Temperature</td>
+              <td>DS18B20 (-55°C to +125°C)</td>
+            </tr>
+            <tr>
+              <td>Seismic</td>
+              <td>ADXL345 3-Axis Accelerometer</td>
+            </tr>
+            <tr>
+              <td>Water Level</td>
+              <td>HC-SR04 Ultrasonic (2-400cm)</td>
+            </tr>
+            <tr>
+              <td>Power</td>
+              <td>6V 2W Solar + Li-Ion 3000mAh</td>
+            </tr>
+            <tr>
+              <td>Communication</td>
+              <td>WiFi + LoRaWAN (915MHz)</td>
+            </tr>
+          </table>
+        </div>
+
+        <div class="card">
+          <h2>Deployed Nodes</h2>
+          <div id="node-status">
+            <!-- Populated by JavaScript -->
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Power Efficiency Features</h2>
+        <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));">
+          <div class="component">
+            <div class="component-name">💤 Deep Sleep</div>
+            <div class="component-value">0.01mA</div>
+          </div>
+          <div class="component">
+            <div class="component-name">☀️ Solar Charging</div>
+            <div class="component-value">330mA</div>
+          </div>
+          <div class="component">
+            <div class="component-name">🔋 Battery Capacity</div>
+            <div class="component-value">3000mAh</div>
+          </div>
+          <div class="component">
+            <div class="component-name">⏰ Wake Interval</div>
+            <div class="component-value">2 minutes</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Circuit Diagrams Tab -->
+    <div id="circuits" class="tab-content">
+      <div class="card">
+        <h2>ESP32 Pinout & Connections</h2>
+        <div class="pin-diagram">
+          <div class="pin">GPIO4 → DS18B20 (OneWire)</div>
+          <div class="pin">GPIO21 → ADXL345 SDA (I2C)</div>
+          <div class="pin">GPIO22 → ADXL345 SCL (I2C)</div>
+          <div class="pin">GPIO5 → HC-SR04 Trigger</div>
+          <div class="pin">GPIO18 → HC-SR04 Echo</div>
+          <div class="pin">GPIO34 → Battery Monitor (ADC)</div>
+          <div class="pin">3.3V → Sensor Power</div>
+          <div class="pin">GND → Common Ground</div>
+        </div>
+      </div>
+
+      <div class="grid">
+        <div class="card">
+          <h2>Temperature Sensor Circuit</h2>
+          <div class="circuit-diagram">
+            <svg viewBox="0 0 400 200">
+              <!-- ESP32 -->
+              <rect x="10" y="50" width="80" height="100" fill="#2563eb" stroke="#1e40af" stroke-width="2"/>
+              <text x="50" y="105" text-anchor="middle" fill="white" font-weight="bold">ESP32</text>
+
+              <!-- DS18B20 -->
+              <rect x="250" y="70" width="100" height="60" fill="#10b981" stroke="#059669" stroke-width="2"/>
+              <text x="300" y="105" text-anchor="middle" fill="white" font-size="12">DS18B20</text>
+
+              <!-- Connections -->
+              <line x1="90" y1="70" x2="250" y2="70" stroke="#fbbf24" stroke-width="2"/>
+              <text x="170" y="65" fill="#fbbf24" font-size="12">GPIO4</text>
+
+              <line x1="90" y1="90" x2="250" y2="90" stroke="#ef4444" stroke-width="2"/>
+              <text x="170" y="85" fill="#ef4444" font-size="12">3.3V</text>
+
+              <line x1="90" y1="110" x2="250" y2="110" stroke="#334155" stroke-width="2"/>
+              <text x="170" y="105" fill="#94a3b8" font-size="12">GND</text>
+
+              <!-- Pullup Resistor -->
+              <rect x="160" y="40" width="40" height="15" fill="#64748b" stroke="#475569" stroke-width="1"/>
+              <text x="180" y="52" text-anchor="middle" fill="white" font-size="10">4.7kΩ</text>
+            </svg>
+          </div>
+          <div class="alert info">
+            <strong>OneWire Protocol:</strong> Requires 4.7kΩ pullup resistor on data line
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Seismic Sensor Circuit (I2C)</h2>
+          <div class="circuit-diagram">
+            <svg viewBox="0 0 400 200">
+              <!-- ESP32 -->
+              <rect x="10" y="50" width="80" height="100" fill="#2563eb" stroke="#1e40af" stroke-width="2"/>
+              <text x="50" y="105" text-anchor="middle" fill="white" font-weight="bold">ESP32</text>
+
+              <!-- ADXL345 -->
+              <rect x="250" y="60" width="100" height="80" fill="#8b5cf6" stroke="#7c3aed" stroke-width="2"/>
+              <text x="300" y="105" text-anchor="middle" fill="white" font-size="12">ADXL345</text>
+
+              <!-- SDA -->
+              <line x1="90" y1="80" x2="250" y2="80" stroke="#10b981" stroke-width="2"/>
+              <text x="170" y="75" fill="#10b981" font-size="12">GPIO21 (SDA)</text>
+
+              <!-- SCL -->
+              <line x1="90" y1="100" x2="250" y2="100" stroke="#06b6d4" stroke-width="2"/>
+              <text x="170" y="95" fill="#06b6d4" font-size="12">GPIO22 (SCL)</text>
+
+              <!-- Power -->
+              <line x1="90" y1="120" x2="250" y2="120" stroke="#ef4444" stroke-width="2"/>
+              <text x="170" y="115" fill="#ef4444" font-size="12">3.3V</text>
+
+              <!-- Ground -->
+              <line x1="90" y1="140" x2="250" y2="140" stroke="#334155" stroke-width="2"/>
+              <text x="170" y="135" fill="#94a3b8" font-size="12">GND</text>
+            </svg>
+          </div>
+          <div class="alert info">
+            <strong>I2C Protocol:</strong> 3-axis accelerometer for detecting ice movement
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Water Level Sensor Circuit</h2>
+          <div class="circuit-diagram">
+            <svg viewBox="0 0 400 200">
+              <!-- ESP32 -->
+              <rect x="10" y="50" width="80" height="100" fill="#2563eb" stroke="#1e40af" stroke-width="2"/>
+              <text x="50" y="105" text-anchor="middle" fill="white" font-weight="bold">ESP32</text>
+
+              <!-- HC-SR04 -->
+              <rect x="250" y="60" width="100" height="80" fill="#06b6d4" stroke="#0891b2" stroke-width="2"/>
+              <text x="300" y="95" text-anchor="middle" fill="white" font-size="12">HC-SR04</text>
+              <text x="300" y="110" text-anchor="middle" fill="white" font-size="10">Ultrasonic</text>
+
+              <!-- Trigger -->
+              <line x1="90" y1="75" x2="250" y2="75" stroke="#fbbf24" stroke-width="2"/>
+              <text x="170" y="70" fill="#fbbf24" font-size="12">GPIO5 (Trig)</text>
+
+              <!-- Echo (with voltage divider) -->
+              <line x1="90" y1="95" x2="200" y2="95" stroke="#10b981" stroke-width="2"/>
+              <rect x="200" y="88" width="15" height="14" fill="#f59e0b" stroke="#d97706" stroke-width="1"/>
+              <line x1="215" y1="95" x2="250" y2="95" stroke="#10b981" stroke-width="2"/>
+              <text x="140" y="90" fill="#10b981" font-size="10">GPIO18 (Echo)</text>
+              <text x="207" y="80" fill="#f59e0b" font-size="8">V.Div</text>
+
+              <!-- VCC (5V) -->
+              <line x1="90" y1="115" x2="250" y2="115" stroke="#ef4444" stroke-width="2"/>
+              <text x="170" y="110" fill="#ef4444" font-size="12">5V</text>
+
+              <!-- Ground -->
+              <line x1="90" y1="135" x2="250" y2="135" stroke="#334155" stroke-width="2"/>
+              <text x="170" y="130" fill="#94a3b8" font-size="12">GND</text>
+            </svg>
+          </div>
+          <div class="alert info">
+            <strong>Ultrasonic Sensor:</strong> Measures distance 2-400cm. Echo pin requires voltage divider (5V→3.3V)
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Power System Diagram</h2>
+        <div class="circuit-diagram">
+          <svg viewBox="0 0 600 250">
+            <!-- Solar Panel -->
+            <rect x="10" y="50" width="100" height="80" fill="#fbbf24" stroke="#f59e0b" stroke-width="2"/>
+            <text x="60" y="80" text-anchor="middle" fill="#78350f" font-weight="bold">Solar</text>
+            <text x="60" y="100" text-anchor="middle" fill="#78350f" font-size="12">6V 2W</text>
+
+            <!-- TP4056 Charger -->
+            <rect x="180" y="60" width="100" height="60" fill="#3b82f6" stroke="#1e40af" stroke-width="2"/>
+            <text x="230" y="95" text-anchor="middle" fill="white" font-weight="bold">TP4056</text>
+
+            <!-- Battery -->
+            <rect x="350" y="50" width="80" height="80" fill="#10b981" stroke="#059669" stroke-width="2"/>
+            <text x="390" y="85" text-anchor="middle" fill="white" font-weight="bold">Li-Ion</text>
+            <text x="390" y="105" text-anchor="middle" fill="white" font-size="12">3.7V</text>
+
+            <!-- Regulator -->
+            <rect x="480" y="60" width="100" height="60" fill="#8b5cf6" stroke="#7c3aed" stroke-width="2"/>
+            <text x="530" y="85" text-anchor="middle" fill="white" font-size="12">AMS1117</text>
+            <text x="530" y="100" text-anchor="middle" fill="white" font-size="12">3.3V</text>
+
+            <!-- Connections -->
+            <line x1="110" y1="90" x2="180" y2="90" stroke="#fbbf24" stroke-width="3"/>
+            <line x1="280" y1="90" x2="350" y2="90" stroke="#ef4444" stroke-width="3"/>
+            <line x1="430" y1="90" x2="480" y2="90" stroke="#10b981" stroke-width="3"/>
+
+            <!-- Labels -->
+            <text x="145" y="80" fill="#fbbf24" font-size="10">6V</text>
+            <text x="315" y="80" fill="#ef4444" font-size="10">4.2V</text>
+            <text x="455" y="80" fill="#10b981" font-size="10">3.7V</text>
+
+            <!-- ESP32 -->
+            <rect x="490" y="140" width="80" height="60" fill="#2563eb" stroke="#1e40af" stroke-width="2"/>
+            <text x="530" y="175" text-anchor="middle" fill="white" font-weight="bold">ESP32</text>
+
+            <line x1="530" y1="120" x2="530" y2="140" stroke="#8b5cf6" stroke-width="3"/>
+            <text x="540" y="130" fill="#8b5cf6" font-size="10">3.3V</text>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- Live Sensors Tab -->
+    <div id="sensors" class="tab-content">
+      <div class="node-selector" id="node-selector">
+        <!-- Populated by JavaScript -->
+      </div>
+
+      <div id="sensor-readings">
+        <!-- Populated by JavaScript -->
+      </div>
+    </div>
+
+    <!-- Power System Tab -->
+    <div id="power" class="tab-content">
+      <div class="grid">
+        <div class="card" id="power-nodes">
+          <!-- Populated by JavaScript -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Specifications Tab -->
+    <div id="specs" class="tab-content">
+      <div id="specs-content">
+        <!-- Populated by JavaScript -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let ws;
+    let currentNode = 'glacier_lake_01';
+
+    function showTab(tabName) {
+      // Hide all tabs
+      document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      document.querySelectorAll('.tab').forEach(btn => {
+        btn.classList.remove('active');
+      });
+
+      // Show selected tab
+      document.getElementById(tabName).classList.add('active');
+      event.target.classList.add('active');
+    }
+
+    function selectNode(nodeId) {
+      currentNode = nodeId;
+      document.querySelectorAll('.node-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      event.target.classList.add('active');
+    }
+
+    function connectWebSocket() {
+      ws = new WebSocket('ws://localhost:8080');
+
+      ws.onopen = () => {
+        console.log('Connected to IoT dashboard');
+      };
+
+      ws.onmessage = (event) => {
+        const message = JSON.parse(event.data);
+
+        if (message.type === 'init') {
+          updateOverview(message.data);
+          createNodeSelector(message.data);
+          loadSpecs();
+        } else if (message.type === 'update') {
+          updateSensorReadings(message.data);
+          updatePowerStatus(message.data);
+        }
+      };
+
+      ws.onclose = () => {
+        console.log('Disconnected from dashboard');
+        setTimeout(connectWebSocket, 5000);
+      };
+    }
+
+    function updateOverview(nodes) {
+      const container = document.getElementById('node-status');
+      container.innerHTML = '';
+
+      for (const [nodeId, node] of Object.entries(nodes)) {
+        const div = document.createElement('div');
+        div.className = 'component';
+        div.innerHTML = `
+          <div>
+            <span class="status-indicator online"></span>
+            <span class="component-name">${node.location.name}</span>
+          </div>
+          <div class="component-value">${node.elevation}m</div>
+        `;
+        container.appendChild(div);
+      }
+    }
+
+    function createNodeSelector(nodes) {
+      const container = document.getElementById('node-selector');
+      container.innerHTML = '';
+
+      for (const [nodeId, node] of Object.entries(nodes)) {
+        const btn = document.createElement('button');
+        btn.className = `node-btn ${nodeId === currentNode ? 'active' : ''}`;
+        btn.onclick = () => selectNode(nodeId);
+        btn.innerHTML = `
+          <div style="font-weight: bold;">${node.location.name}</div>
+          <div style="font-size: 0.85rem; color: #94a3b8; margin-top: 5px;">${nodeId}</div>
+        `;
+        container.appendChild(btn);
+      }
+    }
+
+    function updateSensorReadings(updates) {
+      if (!updates[currentNode]) return;
+
+      const data = updates[currentNode];
+      const container = document.getElementById('sensor-readings');
+
+      container.innerHTML = `
+        <div class="card">
+          <h2>📡 Live Sensor Data - ${currentNode}</h2>
+
+          <div class="sensor-reading">
+            <div class="reading-label">🌡️ Temperature</div>
+            <div class="reading-value">${data.temperature}°C</div>
+          </div>
+
+          <div class="sensor-reading">
+            <div class="reading-label">📊 Seismic Activity</div>
+            <div class="reading-value">${data.seismic_activity} g</div>
+          </div>
+
+          <div class="sensor-reading">
+            <div class="reading-label">💧 Water Level</div>
+            <div class="reading-value">${data.water_level} cm</div>
+          </div>
+
+          <div class="sensor-reading">
+            <div class="reading-label">🔋 Battery</div>
+            <div class="reading-value">${data.battery.toFixed(1)}%</div>
+          </div>
+
+          <div class="alert ${data.solarCharging ? 'info' : 'warning'}">
+            ${data.solarCharging ? '☀️ Solar charging active' : '🌙 Running on battery'}
+          </div>
+        </div>
+      `;
+    }
+
+    function updatePowerStatus(updates) {
+      const container = document.getElementById('power-nodes');
+      container.innerHTML = '<h2>🔋 Power Status - All Nodes</h2>';
+
+      for (const [nodeId, data] of Object.entries(updates)) {
+        const batteryClass = data.battery > 70 ? '' : data.battery > 30 ? 'medium' : 'low';
+
+        const div = document.createElement('div');
+        div.innerHTML = `
+          <div style="margin-bottom: 20px;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+              <span class="component-name">${nodeId}</span>
+              <span style="color: #94a3b8;">${data.batteryVoltage.toFixed(2)}V</span>
+            </div>
+            <div class="battery-indicator">
+              <div class="battery-fill ${batteryClass}" style="width: ${data.battery}%">
+                ${data.battery.toFixed(1)}%
+              </div>
+            </div>
+            <div style="margin-top: 8px; font-size: 0.85rem; color: #94a3b8;">
+              ${data.solarCharging ? '☀️ Charging' : '🔌 Discharging'}
+            </div>
+          </div>
+        `;
+        container.appendChild(div);
+      }
+    }
+
+    async function loadSpecs() {
+      try {
+        const response = await fetch('/api/circuit-specs');
+        const specs = await response.json();
+
+        const container = document.getElementById('specs-content');
+        container.innerHTML = `
+          <div class="card">
+            <h2>📝 Hardware Specifications</h2>
+
+            <h3 style="color: #60a5fa; margin: 20px 0 10px 0;">Sensors</h3>
+            <table class="spec-table">
+              <tr><th>Component</th><th>Specification</th></tr>
+              <tr><td>Temperature Sensor</td><td>${specs.sensors.temperature.model} - ${specs.sensors.temperature.range}</td></tr>
+              <tr><td>Seismic Sensor</td><td>${specs.sensors.seismic.model} - ${specs.sensors.seismic.range}</td></tr>
+              <tr><td>Water Level Sensor</td><td>${specs.sensors.waterLevel.model} - ${specs.sensors.waterLevel.range}</td></tr>
+            </table>
+
+            <h3 style="color: #60a5fa; margin: 20px 0 10px 0;">Power System</h3>
+            <table class="spec-table">
+              <tr><th>Component</th><th>Specification</th></tr>
+              <tr><td>Solar Panel</td><td>${specs.power.solarPanel.model}</td></tr>
+              <tr><td>Battery</td><td>${specs.power.battery.model} - ${specs.power.battery.capacity}</td></tr>
+              <tr><td>Charge Controller</td><td>${specs.power.chargeController.model}</td></tr>
+              <tr><td>Voltage Regulator</td><td>${specs.power.regulator.model}</td></tr>
+            </table>
+
+            <h3 style="color: #60a5fa; margin: 20px 0 10px 0;">Communication</h3>
+            <table class="spec-table">
+              <tr><th>Protocol</th><th>Specification</th></tr>
+              <tr><td>WiFi</td><td>${specs.communication.wifi.standard} @ ${specs.communication.wifi.frequency}</td></tr>
+              <tr><td>LoRaWAN</td><td>${specs.communication.lora.model} - ${specs.communication.lora.frequency}</td></tr>
+            </table>
+          </div>
+        `;
+      } catch (error) {
+        console.error('Failed to load specs:', error);
+      }
+    }
+
+    // Initialize
+    connectWebSocket();
+  </script>
+</body>
+</html>

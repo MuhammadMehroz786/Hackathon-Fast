@@ -1,0 +1,26 @@
+{
+  "name": "barfani-iot-simulator",
+  "version": "1.0.0",
+  "description": "Virtual IoT Sensor Node Simulator for Project Barfani - Simulates ESP32 devices with sensors, solar power, and LoRaWAN",
+  "main": "simulator.js",
+  "scripts": {
+    "start": "node simulator.js",
+    "dashboard": "node dashboard-server.js",
+    "transmit": "node run-and-transmit.js"
+  },
+  "keywords": [
+    "iot",
+    "esp32",
+    "simulator",
+    "glof",
+    "glacier",
+    "sensors"
+  ],
+  "author": "Project Barfani Team",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^1.6.0",
+    "express": "^4.18.2",
+    "ws": "^8.14.2"
+  }
+}

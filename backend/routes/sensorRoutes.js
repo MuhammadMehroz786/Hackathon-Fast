@@ -208,4 +208,57 @@ router.get('/node/:nodeId', async (req, res) => {
   }
 });
 
+/**
+ * POST /api/sensor/reset
+ * Reset all sensor data and alerts (useful when switching from test mode to real-time)
+ */
+router.post('/reset', async (req, res) => {
+  try {
+    console.log('🔄 Resetting all sensor data and alerts...');
+
+    // Clear in-memory storage
+    sensorDataStore = [];
+    alertStore = [];
+
+    // Invalidate cache
+    nodesCache = null;
+    nodesCacheTime = null;
+
+    // Reset alert engine history
+    if (alertEngine && alertEngine.reset) {
+      alertEngine.reset();
+    }
+
+    // Clear Firebase data if configured
+    if (db) {
+      await db.ref('sensor_data').remove();
+      await db.ref('alerts').remove();
+      console.log('✅ Firebase data cleared');
+    }
+
+    // Emit reset event to all connected clients
+    const io = req.app.get('io');
+    if (io) {
+      io.emit('system_reset', { timestamp: new Date().toISOString() });
+      console.log('📡 Reset event broadcasted to all clients');
+    }
+
+    console.log('✅ System reset complete - ready for real-time data');
+
+    res.json({
+      success: true,
+      message: 'System reset successfully - all test data cleared',
+      timestamp: new Date().toISOString()
+    });
+
+  } catch (error) {
+    console.error('Error resetting system:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to reset system',
+      details: error.message
+    });
+  }
+});
+
 module.exports = router;
